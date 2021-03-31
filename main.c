@@ -16,7 +16,7 @@ int main(){
     #endif
 
     yyin = fopen(argv[1], 'r');
-    yyout = fopen(argv[2], 'w');
+    yyout = stdout;
     fprintf(yyout, "HELLO\n");
     yyparse();
     fprintf(yyout, "BYE\n");

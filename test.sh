@@ -1,2 +1,2 @@
 make clean && make
-./comp input.txt output.txt
+./comp input.txt
