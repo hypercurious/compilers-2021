@@ -1,2 +1,1 @@
-make clean && make
-./comp input.txt
+make clean && make && make run
