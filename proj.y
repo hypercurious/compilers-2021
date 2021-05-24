@@ -45,9 +45,9 @@ void yyerror(const char* s);
 
 %%
 
-main: program lfunc NL STARTMAIN NL VARS NL vardecl assignment ENDMAIN NL
-    | program lfunc NL STARTMAIN NL assignment ENDMAIN NL
-    | program lfunc NL STARTMAIN NL lvar ENDMAIN NL
+main: program lfunc STARTMAIN NL VARS NL vardecl assignment ENDMAIN NL
+    | program lfunc STARTMAIN NL assignment ENDMAIN NL
+    | program lfunc STARTMAIN NL lvar ENDMAIN NL
     | program
 ;
 
@@ -92,8 +92,8 @@ return: RETURN VARNAME
       | RETURN NUMBER
 ;
 
-function: FUNCTION VARNAME LPAR lvar RPAR NL VARS NL vardecl return NL END_FUNCTION
-        | FUNCTION VARNAME LPAR lvar RPAR NL return NL END_FUNCTION
+function: FUNCTION VARNAME LPAR lvar RPAR NL VARS NL vardecl return NL END_FUNCTION NL
+        | FUNCTION VARNAME LPAR lvar RPAR NL return NL END_FUNCTION NL
 ;
 
 %%
