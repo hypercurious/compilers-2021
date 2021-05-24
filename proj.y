@@ -23,19 +23,39 @@ void yyerror(const char* s);
     char* sval;
 }
 
-%token <sval> VARNAME
 %token NUMBER
 %token OPERATION
+%token COMPOPERATION
+%token LOGICOPERATION
+%token TEXT
+%token <sval> VARNAME
 %token NL
 %token LPAR
 %token RPAR
 %token COMMA
 %token SEMI
 %token EQUAL
+%token COLON
 %token VARS
 %token CHAR
 %token INTEGER
 %token ARRAY
+%token WHILE
+%token ENDWHILE
+%token FOR
+%token TO
+%token STEP
+%token ENDFOR
+%token IF
+%token THEN
+%token ELSEIF
+%token ELSE
+%token ENDIF
+%token SWITCH
+%token CASE
+%token DEFAULT 
+%token ENDSWITCH
+%token PRINT
 %token PROGRAM
 %token FUNCTION
 %token RETURN
@@ -45,10 +65,20 @@ void yyerror(const char* s);
 
 %%
 
-main: program lfunc STARTMAIN NL VARS NL vardecl assignment ENDMAIN NL
-    | program lfunc STARTMAIN NL assignment ENDMAIN NL
+main: program lfunc STARTMAIN NL VARS NL vardecl commands ENDMAIN NL
+    | program lfunc STARTMAIN NL commands ENDMAIN NL
     | program lfunc STARTMAIN NL lvar ENDMAIN NL
     | program
+;
+
+commands: assignment commands
+        | loop commands
+        | conditional commands
+        | print commands
+        | assignment
+        | loop
+        | conditional
+        | print
 ;
 
 assignment: VARNAME EQUAL value SEMI NL
@@ -62,6 +92,7 @@ lval: value COMMA lval
 ;
 
 value: value OPERATION value
+     | value complogoperation value
      | LPAR value RPAR
      | VARNAME arguments
      | ARRAY
@@ -94,6 +125,49 @@ return: RETURN VARNAME
 
 function: FUNCTION VARNAME LPAR lvar RPAR NL VARS NL vardecl return NL END_FUNCTION NL
         | FUNCTION VARNAME LPAR lvar RPAR NL return NL END_FUNCTION NL
+;
+
+complogoperation: COMPOPERATION
+                | LOGICOPERATION
+;
+
+statement: value complogoperation statement
+         | value
+;
+
+while: WHILE statement NL commands ENDWHILE
+;
+
+for: FOR VARNAME COLON EQUAL NUMBER TO NUMBER STEP NUMBER NL commands ENDFOR
+;
+
+loop: for NL
+    | while NL
+;
+
+lif: ELSEIF statement NL commands ELSE NL commands    
+   | ELSEIF statement NL commands lif
+   | ELSEIF statement NL commands
+;
+
+if: IF statement THEN NL commands lif ENDIF
+  | IF statement THEN NL commands ENDIF
+;
+
+lcase: CASE value COLON NL commands DEFAULT COLON NL commands
+     | CASE value COLON NL commands lcase
+     | CASE value COLON NL commands
+;
+
+switch: SWITCH value NL lcase ENDSWITCH
+;
+
+conditional: if NL
+          |  switch NL
+;
+
+print: PRINT LPAR TEXT COMMA lvar RPAR SEMI NL
+     | PRINT LPAR TEXT RPAR SEMI NL
 ;
 
 %%
