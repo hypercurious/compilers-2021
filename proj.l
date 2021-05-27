@@ -12,10 +12,13 @@
 %option noyywrap
 %option yylineno
 
+%x COMMENTS
+
 number [0-9]+
 operation [\+\-\^\*\/]
 compoperation [\>\<]
 text \"(\\.|[^\\"])*\"
+comment "%".*
 varname [_a-zA-Z][a-zA-Z0-9]*
 array [_a-zA-Z][a-zA-Z0-9]*\[[0-9]*\]
 
@@ -51,7 +54,11 @@ array [_a-zA-Z][a-zA-Z0-9]*\[[0-9]*\]
 "DEFAULT" { return DEFAULT; }
 "ENDSWITCH" { return ENDSWITCH; }
 "PRINT" { return PRINT; }
+"BREAK" { return BREAK; }
 "PROGRAM" { return PROGRAM; }
+"TYPEDEF" { return TYPEDEF; }
+"STRUCT" { return STRUCT; }
+"ENDSTRUCT" { return  ENDSTRUCT; }
 "FUNCTION" { return FUNCTION; }
 "RETURN" { return RETURN; }
 "END_FUNCTION" { return END_FUNCTION; }
@@ -61,5 +68,11 @@ array [_a-zA-Z][a-zA-Z0-9]*\[[0-9]*\]
 {operation} { return OPERATION; }
 {compoperation} { return COMPOPERATION; }
 {text} { return TEXT; }
+{comment} {  } //ignore inline comments
 {varname} { yylval.sval = yytext; return VARNAME; }
 {array} { return ARRAY; }
+
+"/*"                { BEGIN(COMMENTS); } //ignore block comments using start states
+<COMMENTS>"*/"    { BEGIN(INITIAL); }
+<COMMENTS>.       {  }
+<COMMENTS>\n      {  }

@@ -1,38 +1,87 @@
-PROGRAM elagiann
-FUNCTION giorgaras(takis,pakis,takis)
-VARS
-CHAR var1,var2,var3[10],var4;
-RETURN 3
+PROGRAM program
+
+STRUCT withoutTypedef
+    VARS
+    CHAR var1,var2,var3[10],var4;
+    INTEGER x,y,z;
+ENDSTRUCT
+
+TYPEDEF STRUCT withTypedef
+    VARS
+    CHAR var1,var2,var3[10],var4;
+    INTEGER x,y,z;
+withTypedef ENDSTRUCT
+
+%comment
+% another comment
+/* one line comment */
+/*
+
+commenting
+out
+multiple
+lines
+of code
+
+*/
+
+FUNCTION function(x,y,z) /* creating a 
+block comment
+next to 
+an instruction
+*/
+    VARS
+    CHAR var1,var2,var3[10],var4;
+    INTEGER x,y,z;
+
+    var1 = 2;
+    var2 = var3 + 5 * 2^(3-7/(var1+var3));
+    var4 = var3;
+    var5 = function1(var1,var2);
+
+    RETURN 3;
 END_FUNCTION
+
+FUNCTION function1(a,b,c) % one line comment
+    var2=7;
+    RETURN x;
+END_FUNCTION
+
 STARTMAIN
-VARS
-CHAR var1,var2,var3[10],var4;
-var5 = var3 + 5 * 2^(3-7/(var1+var3));
-WHILE(((3+4) > 3 AND takis) OR petros)
-var5 = var3 + 5 * 2^(3-7/(var1+var3));
-ENDWHILE
-FOR takis:=3 TO 32 STEP 1
-var5 = var3 + 5 * 2^(3-7/(var1+var3));
-WHILE(((3+4) > 3 AND takis) OR petros)
-var5 = var3 + 5 * 2^(3-7/(var1+var3));
-ENDWHILE
-ENDFOR
-IF((patates>ntomates) AND (3+4>2)) THEN
-var5 = var3 + 5 * 2^(3-7/(var1+var3));
-ELSEIF((3+4)>2)
-var5 = var3;
-ELSE
-WHILE(((3+4) > 3 AND takis) OR petros)
-var5 = var3 + 5 * 2^(3-7/(var1+var3));
-ENDWHILE
-ENDIF
-SWITCH(((3+4) > 3 AND takis) OR petros)
-CASE(5==3):
-var6=7;
-CASE(4!=3):
-giannis=itsok;
-DEFAULT:
-test=giannis(21);
-ENDSWITCH
-PRINT("GGiannis is beautiful %d", var7, var3, giaanis[23]);
+    VARS
+    CHAR var1,var2,var3[10],var4;
+    INTEGER x,y,z;
+
+    var5 = var3 + 5 * 2^(3-7/(var1+var3));
+
+    WHILE(((3+4) > 3 AND x) OR y)
+        var5 = var3 + 5 * 2^(3-7/(var1+var3));
+    ENDWHILE
+
+    FOR x:=3 TO 32 STEP 1
+        var5 = var3 + 5 * 2^(3-7/(var1+var3));
+        WHILE(((3+4) > 3 AND x) OR y)
+            var5 = var3 + 5 * 2^(3-7/(var1+var3));
+        ENDWHILE
+    ENDFOR
+
+    IF((a>b) AND (3+4>2)) THEN
+        var5 = var3 + 5 * 2^(3-7/(var1+var3));
+    ELSEIF((3+4)>2)
+        var5 = var3;
+    ELSE
+        WHILE(((3+4) > 3 AND x) OR y)
+            var5 = var3 + 5 * 2^(3-7/(var1+var3));
+        ENDWHILE
+    ENDIF
+
+    SWITCH(((3+4) > 3 AND x) OR y)
+    CASE(5==3):
+        var6=7;
+    CASE(4!=3):
+        var2=var5;
+    DEFAULT:
+        var1=function(21);
+    ENDSWITCH
+    PRINT("This is a print", var7, var3, var0[23]);
 ENDMAIN

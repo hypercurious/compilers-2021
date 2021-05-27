@@ -56,7 +56,11 @@ void yyerror(const char* s);
 %token DEFAULT 
 %token ENDSWITCH
 %token PRINT
+%token BREAK
 %token PROGRAM
+%token TYPEDEF
+%token STRUCT
+%token ENDSTRUCT
 %token FUNCTION
 %token RETURN
 %token END_FUNCTION
@@ -65,23 +69,37 @@ void yyerror(const char* s);
 
 %%
 
-main: program lfunc STARTMAIN NL VARS NL vardecl commands ENDMAIN NL
-    | program lfunc STARTMAIN NL commands ENDMAIN NL
-    | program lfunc STARTMAIN NL lvar ENDMAIN NL
-    | program
+main: program lstruct lfunc STARTMAIN nl vardecl instructions ENDMAIN nl
+    | program lstruct lfunc STARTMAIN nl instructions ENDMAIN nl
+    | program lstruct STARTMAIN nl vardecl instructions ENDMAIN nl
+    | program lstruct STARTMAIN nl instructions ENDMAIN nl
+    | program lfunc STARTMAIN nl vardecl instructions ENDMAIN nl
+    | program lfunc STARTMAIN nl instructions ENDMAIN nl
+    | program STARTMAIN nl vardecl instructions ENDMAIN nl
+    | program STARTMAIN nl instructions ENDMAIN nl
 ;
 
-commands: assignment commands
-        | loop commands
-        | conditional commands
-        | print commands
-        | assignment
-        | loop
-        | conditional
-        | print
+nl: NL nl
+  | NL
 ;
 
-assignment: VARNAME EQUAL value SEMI NL
+breakinstr: instructions breakinstr
+          | break breakinstr
+          | instructions
+          | break;
+;
+
+instructions: assignment instructions
+            | loop instructions
+            | conditional instructions
+            | print instructions
+            | assignment
+            | loop
+            | conditional
+            | print
+;
+
+assignment: VARNAME EQUAL value SEMI nl
 ;
 
 arguments: LPAR lval RPAR
@@ -100,7 +118,7 @@ value: value OPERATION value
      | VARNAME
 ;
 
-program: PROGRAM VARNAME NL
+program: PROGRAM VARNAME nl
 ;
 
 lvar: VARNAME COMMA lvar
@@ -109,22 +127,25 @@ lvar: VARNAME COMMA lvar
     | ARRAY
 ;
 
+vars: CHAR lvar SEMI nl vars
+    | INTEGER lvar SEMI nl vars
+    | CHAR lvar SEMI nl
+    | INTEGER lvar SEMI nl
+;
+
+vardecl: VARS nl vars
+;
+
+return: RETURN VARNAME SEMI
+      | RETURN NUMBER SEMI
+;
+
 lfunc: function lfunc
      | function
 ;
 
-vardecl: CHAR lvar SEMI NL vardecl
-    |   INTEGER lvar SEMI NL vardecl
-    |   CHAR lvar SEMI NL
-    |   INTEGER lvar SEMI NL
-;
-
-return: RETURN VARNAME
-      | RETURN NUMBER
-;
-
-function: FUNCTION VARNAME LPAR lvar RPAR NL VARS NL vardecl return NL END_FUNCTION NL
-        | FUNCTION VARNAME LPAR lvar RPAR NL return NL END_FUNCTION NL
+function: FUNCTION VARNAME LPAR lvar RPAR nl vardecl instructions return nl END_FUNCTION nl
+        | FUNCTION VARNAME LPAR lvar RPAR nl instructions return nl END_FUNCTION nl
 ;
 
 complogoperation: COMPOPERATION
@@ -135,39 +156,50 @@ statement: value complogoperation statement
          | value
 ;
 
-while: WHILE statement NL commands ENDWHILE
+while: WHILE statement nl breakinstr ENDWHILE
 ;
 
-for: FOR VARNAME COLON EQUAL NUMBER TO NUMBER STEP NUMBER NL commands ENDFOR
+for: FOR VARNAME COLON EQUAL NUMBER TO NUMBER STEP NUMBER nl breakinstr ENDFOR
 ;
 
-loop: for NL
-    | while NL
+loop: for nl
+    | while nl
 ;
 
-lif: ELSEIF statement NL commands ELSE NL commands    
-   | ELSEIF statement NL commands lif
-   | ELSEIF statement NL commands
+lif: ELSEIF statement nl breakinstr ELSE nl breakinstr
+   | ELSEIF statement nl breakinstr lif
+   | ELSEIF statement nl breakinstr
 ;
 
-if: IF statement THEN NL commands lif ENDIF
-  | IF statement THEN NL commands ENDIF
+if: IF statement THEN nl breakinstr lif ENDIF
+  | IF statement THEN nl breakinstr ENDIF
 ;
 
-lcase: CASE value COLON NL commands DEFAULT COLON NL commands
-     | CASE value COLON NL commands lcase
-     | CASE value COLON NL commands
+lcase: CASE value COLON nl breakinstr DEFAULT COLON nl breakinstr
+     | CASE value COLON nl breakinstr lcase
+     | CASE value COLON nl breakinstr
 ;
 
-switch: SWITCH value NL lcase ENDSWITCH
+switch: SWITCH value nl lcase ENDSWITCH
 ;
 
-conditional: if NL
-          |  switch NL
+conditional: if nl
+          |  switch nl
 ;
 
-print: PRINT LPAR TEXT COMMA lvar RPAR SEMI NL
-     | PRINT LPAR TEXT RPAR SEMI NL
+print: PRINT LPAR TEXT COMMA lvar RPAR SEMI nl
+     | PRINT LPAR TEXT RPAR SEMI nl
+;
+
+break: BREAK SEMI nl
+;
+
+lstruct: struct lstruct
+       | struct
+;
+
+struct: TYPEDEF STRUCT VARNAME nl vardecl VARNAME ENDSTRUCT nl
+      | STRUCT VARNAME nl vardecl ENDSTRUCT nl
 ;
 
 %%
@@ -186,5 +218,5 @@ int main(int argc, char* argv[]){
 }
 
 void yyerror(const char *s){
-    printf("%s\n", s);
+    fprintf(stderr, "%s\n", s);
 }
