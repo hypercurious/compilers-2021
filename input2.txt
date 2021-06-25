@@ -1,4 +1,4 @@
-PROGRAM antonis
+PROGRAM hub
 
     STRUCT withoutTypedef
         VARS
@@ -10,7 +10,7 @@ PROGRAM antonis
         VARS
         CHAR var1,var2,varArray[10],var4;
         INTEGER x,y,z;
-    wrong ENDSTRUCT
+    withTypedef ENDSTRUCT
 
     %comment
     % another comment

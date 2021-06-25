@@ -30,7 +30,7 @@ void context_check(char *sym_name);
 %token OPERATION
 %token COMPOPERATION
 %token LOGICOPERATION
-%token TEXT
+%token <sval> TEXT
 %token <sval> VARNAME
 %token <sval> ARRAY
 %token NL
@@ -199,7 +199,7 @@ plvar: VARNAME COMMA plvar { context_check($1); }
 ;
 
 print: PRINT LPAR TEXT COMMA plvar RPAR SEMI nl
-     | PRINT LPAR TEXT RPAR SEMI nl
+     | PRINT LPAR TEXT RPAR SEMI nl { printf("%s", $3); }
 ;
 
 break: BREAK SEMI nl
@@ -228,8 +228,9 @@ int main(int argc, char* argv[]){
     yyparse();
     fprintf(yyout, "BYE\n");
     
+    printf("\n[SYMBOL TABLE]\n");
     for (int i = 0; i < size; i++) {
-        printf("[TABLE] %s\n", symbol_table[i].name);  
+        printf("Variable %d: %s\n", i, symbol_table[i].name);  
     }
 
     return 0;
@@ -247,11 +248,14 @@ void install(char* sym_name){
         printf("Symbol name: %s \n", sym_name);
     }
     else {
-        printf("%s is already defined \n", sym_name);
+        printf("%s is already defined \nExiting...", sym_name);
+        exit(-1);
     }
 }
 
 void context_check(char* sym_name){
-    if(getsym(sym_name)==0)
-        printf("%s is an undeclared identifier\n", sym_name);
+    if(getsym(sym_name)==0){
+        printf("%s is an undeclared variable\nExiting...", sym_name);
+        exit(-1);
+    }
 }

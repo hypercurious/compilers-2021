@@ -67,7 +67,7 @@ array [_a-zA-Z][a-zA-Z0-9]*\[[0-9]*\]
 {number} { return NUMBER; }
 {operation} { return OPERATION; }
 {compoperation} { return COMPOPERATION; }
-{text} { return TEXT; }
+{text} { yylval.sval = (char*) strdup(yytext); return TEXT; }
 {comment} {  } //ignore inline comments
 {varname} { yylval.sval = (char*) strdup(yytext); return VARNAME; }
 {array} { for (int i = 0; i < yyleng; i++) { if(yytext[i] == '[') {yytext[i] = '\0'; } } yylval.sval = strdup(yytext); return ARRAY; }
