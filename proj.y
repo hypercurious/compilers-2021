@@ -4,6 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "ST.h"
+
+int size;
+symrec* symbol_table;
 
 extern int yylex();
 extern int yyparse();
@@ -13,13 +17,12 @@ extern FILE* yyin;
 extern FILE* yyout;
 
 void yyerror(const char* s);
-
-//METAVLHTES KAI SUNARTHSEIS
+void install(char *sym_name);
+void context_check(char *sym_name);
 
 %}
 
 %union{
-    int   ival;
     char* sval;
 }
 
@@ -29,6 +32,7 @@ void yyerror(const char* s);
 %token LOGICOPERATION
 %token TEXT
 %token <sval> VARNAME
+%token <sval> ARRAY
 %token NL
 %token LPAR
 %token RPAR
@@ -39,7 +43,6 @@ void yyerror(const char* s);
 %token VARS
 %token CHAR
 %token INTEGER
-%token ARRAY
 %token WHILE
 %token ENDWHILE
 %token FOR
@@ -99,7 +102,7 @@ instructions: assignment instructions
             | print
 ;
 
-assignment: VARNAME EQUAL value SEMI nl
+assignment: VARNAME EQUAL value SEMI nl { context_check($1); }
 ;
 
 arguments: LPAR lval RPAR
@@ -112,31 +115,33 @@ lval: value COMMA lval
 value: value OPERATION value
      | value complogoperation value
      | LPAR value RPAR
-     | VARNAME arguments
-     | ARRAY
+     | VARNAME arguments { context_check($1); }
+     | ARRAY { context_check($1); }
      | NUMBER
-     | VARNAME
+     | VARNAME { context_check($1); }
 ;
 
-program: PROGRAM VARNAME nl
+program: PROGRAM VARNAME nl { install($2); }
 ;
 
-lvar: VARNAME COMMA lvar
-    | ARRAY COMMA lvar
-    | VARNAME
-    | ARRAY
+lvar: VARNAME COMMA lvar { install($1); }
+    | ARRAY COMMA lvar { install($1); }
+    | VARNAME { install($1); }
+    | ARRAY { install($1); }
 ;
 
-vars: CHAR lvar SEMI nl vars
-    | INTEGER lvar SEMI nl vars
-    | CHAR lvar SEMI nl
-    | INTEGER lvar SEMI nl
+vartypes: CHAR
+        | INTEGER
+;
+
+vars: vartypes lvar SEMI nl vars
+    | vartypes lvar SEMI nl
 ;
 
 vardecl: VARS nl vars
 ;
 
-return: RETURN VARNAME SEMI
+return: RETURN VARNAME SEMI { context_check($2); }
       | RETURN NUMBER SEMI
 ;
 
@@ -144,8 +149,8 @@ lfunc: function lfunc
      | function
 ;
 
-function: FUNCTION VARNAME LPAR lvar RPAR nl vardecl instructions return nl END_FUNCTION nl
-        | FUNCTION VARNAME LPAR lvar RPAR nl instructions return nl END_FUNCTION nl
+function: FUNCTION VARNAME LPAR lvar RPAR nl vardecl instructions return nl END_FUNCTION nl { install($2); }
+        | FUNCTION VARNAME LPAR lvar RPAR nl instructions return nl END_FUNCTION nl { install($2); }
 ;
 
 complogoperation: COMPOPERATION
@@ -159,7 +164,7 @@ statement: value complogoperation statement
 while: WHILE statement nl breakinstr ENDWHILE
 ;
 
-for: FOR VARNAME COLON EQUAL NUMBER TO NUMBER STEP NUMBER nl breakinstr ENDFOR
+for: FOR VARNAME COLON EQUAL NUMBER TO NUMBER STEP NUMBER nl breakinstr ENDFOR { context_check($2); }
 ;
 
 loop: for nl
@@ -187,7 +192,13 @@ conditional: if nl
           |  switch nl
 ;
 
-print: PRINT LPAR TEXT COMMA lvar RPAR SEMI nl
+plvar: VARNAME COMMA plvar { context_check($1); }
+    | ARRAY COMMA plvar { context_check($1); }
+    | VARNAME { context_check($1); }
+    | ARRAY { context_check($1); }
+;
+
+print: PRINT LPAR TEXT COMMA plvar RPAR SEMI nl
      | PRINT LPAR TEXT RPAR SEMI nl
 ;
 
@@ -198,8 +209,8 @@ lstruct: struct lstruct
        | struct
 ;
 
-struct: TYPEDEF STRUCT VARNAME nl vardecl VARNAME ENDSTRUCT nl
-      | STRUCT VARNAME nl vardecl ENDSTRUCT nl
+struct: TYPEDEF STRUCT VARNAME nl vardecl VARNAME ENDSTRUCT nl { if(strcmp($3,$6)==0) install($3); else printf("Error, TYPEDEF name %s is not the same with TYPEDEF name %s\n", $3, $6); }
+      | STRUCT VARNAME nl vardecl ENDSTRUCT nl { install($2); }
 ;
 
 %%
@@ -208,15 +219,39 @@ int main(int argc, char* argv[]){
         yydebug = 1;
     #endif
 
+    size = 0;
+    symbol_table = (symrec*) malloc(1 * sizeof(symrec));
+
     yyin = fopen(argv[1], "r");
     yyout = stdout;
     fprintf(yyout, "HELLO\n");
     yyparse();
     fprintf(yyout, "BYE\n");
+    
+    for (int i = 0; i < size; i++) {
+        printf("[TABLE] %s\n", symbol_table[i].name);  
+    }
 
     return 0;
 }
 
 void yyerror(const char *s){
-    fprintf(stderr, "%s\n", s);
+    fprintf(stderr, " %s\n", s);
+}
+
+void install(char* sym_name){
+    int s;
+    s = getsym(sym_name);
+    if(s == 0){
+        putsym(sym_name);
+        printf("Symbol name: %s \n", sym_name);
+    }
+    else {
+        printf("%s is already defined \n", sym_name);
+    }
+}
+
+void context_check(char* sym_name){
+    if(getsym(sym_name)==0)
+        printf("%s is an undeclared identifier\n", sym_name);
 }

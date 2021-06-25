@@ -5,5 +5,5 @@ proj:
 clean:
 	rm -rf proj.lex.c proj.tab.c proj.tab.h proj.output proj
 run:
-	./proj input.txt
+	./proj input2.txt
 

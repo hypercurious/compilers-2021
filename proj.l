@@ -69,10 +69,10 @@ array [_a-zA-Z][a-zA-Z0-9]*\[[0-9]*\]
 {compoperation} { return COMPOPERATION; }
 {text} { return TEXT; }
 {comment} {  } //ignore inline comments
-{varname} { yylval.sval = yytext; return VARNAME; }
-{array} { return ARRAY; }
+{varname} { yylval.sval = (char*) strdup(yytext); return VARNAME; }
+{array} { for (int i = 0; i < yyleng; i++) { if(yytext[i] == '[') {yytext[i] = '\0'; } } yylval.sval = strdup(yytext); return ARRAY; }
 
-"/*"                { BEGIN(COMMENTS); } //ignore block comments using start states
+"/*"              { BEGIN(COMMENTS); } //ignore block comments using start states
 <COMMENTS>"*/"    { BEGIN(INITIAL); }
 <COMMENTS>.       {  }
 <COMMENTS>\n      {  }
