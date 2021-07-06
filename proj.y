@@ -209,7 +209,7 @@ lstruct: struct lstruct
        | struct
 ;
 
-struct: TYPEDEF STRUCT VARNAME nl vardecl VARNAME ENDSTRUCT nl { if(strcmp($3,$6)==0) install($3); else printf("Error, TYPEDEF name %s is not the same with TYPEDEF name %s\n", $3, $6); }
+struct: TYPEDEF STRUCT VARNAME nl vardecl VARNAME ENDSTRUCT nl { if(strcmp($3,$6)==0) install($3); else { printf("Error, TYPEDEF name %s is not the same with TYPEDEF name %s\n", $3, $6); exit(-1); } }
       | STRUCT VARNAME nl vardecl ENDSTRUCT nl { install($2); }
 ;
 
