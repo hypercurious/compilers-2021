@@ -1,2 +1,2 @@
-# compilers-2021
+# pascal-compiler
 Partial Pascal compiler
